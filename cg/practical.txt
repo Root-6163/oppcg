@@ -1,0 +1,9 @@
+1.concave polygon filling using scan fill algorithm
+2.polygon clipping using coven surface and line clipping algorithm
+3.pattern drawing using live and circle
+4.basic 2d transformation
+5.curve and fractals
+6.implementation of openGL
+7 animation using c++
+8.mini project
+
