@@ -1,6 +1,6 @@
-#include<iostream>
-#include<string>
-#include<vector>
+#include <iostream>
+#include <string>
+#include <vector>
 using namespace std;
 
 class StudData;
@@ -16,7 +16,7 @@ class Student {
 
 public:
     Student();
-    static int getCount();
+    static int getCount(); // Declare static method
     void getData(StudData*);
     void dispData(StudData*);
 };
@@ -32,12 +32,19 @@ public:
     void dispStudData();
 };
 
+// Static member initialization
 int Student::count = 0;
 
+// Constructor definitions
 Student::Student() : name(""), roll_no(0), cls(""), division(""), dob("dd/mm/yyyy"), bloodgroup("") {}
-
 StudData::StudData() : caddress(""), telno(0), dlno(0) {}
 
+// Define the static method
+int Student::getCount() {
+    return count;
+}
+
+// Member function definitions
 void Student::getData(StudData* st) {
     cout << "Enter Student Name: ";
     cin >> name;
@@ -89,7 +96,7 @@ int main() {
     do {
         Student s;
         StudData sd;
-        
+
         cout << "Default Details of Student" << endl;
         s.dispData(&sd);
 
