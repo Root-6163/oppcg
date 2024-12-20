@@ -1,24 +1,16 @@
-//file handling mode creata afile and write mode on and save it again used it asa in display on screen
-/*1 . first we want to create a file
-2. open this file in write mode
-3.write file 
-4.close this file
-5. open the file again and display on screen 
-6.file.close()
-*/
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring> // For strcmp
 using namespace std;
 
 class Student {
-    public:
-        char name[20];
-        string phone;
+public:
+    char name[20];
+    char phone[15];
 
-    public:
-        void accept();
-        void display();
+    void accept();
+    void display();
 };
 
 void Student::accept() {
@@ -34,14 +26,16 @@ void Student::display() {
 
 int main() {
     int ch, limit;
+
     cout << "Enter the number of people whose information is to be stored: ";
     cin >> limit;
 
-    Student* a = new Student[limit];
-    fstream file("data.txt", ios::in | ios::out | ios::app | ios::binary);
+    Student* students = new Student[limit];
+    fstream file("data.bin", ios::in | ios::out | ios::binary | ios::app);
 
     if (!file) {
         cerr << "Error in opening the file!" << endl;
+        delete[] students;
         return 1;
     }
 
@@ -50,87 +44,67 @@ int main() {
         cin >> ch;
 
         switch (ch) {
-            case 1: // Store
-                cout << "Enter the name and phone number for each person:\n";
+            case 1: { // Store
+                cout << "Enter details of each person:\n";
                 for (int i = 0; i < limit; ++i) {
-                    a[i].accept();
-                    file.write(reinterpret_cast<char*>(&a[i], sizeof(a[i])));
+                    students[i].accept();
+                    file.write(reinterpret_cast<char*>(&students[i]), sizeof(Student));
                 }
                 break;
+            }
 
-            case 2: // Display
+            case 2: { // Display
                 cout << "Stored information:\n";
-                file.clear(); // clear any EOF or error flags
-                file.seekg(0); // reset to beginning of file
-                for (int i = 0; i < limit; ++i) {
-                    file.read(reinterpret_cast<char*>(&a[i]), sizeof(a[i]));
-                    a[i].display();
+                file.clear();
+                file.seekg(0, ios::beg);
+                Student temp;
+                while (file.read(reinterpret_cast<char*>(&temp), sizeof(Student))) {
+                    temp.display();
                 }
                 break;
+            }
 
             case 3: { // Search
-                int searchType;
-                cout << "Search by:\n1. Name\n2. Phone\nEnter choice: ";
-                cin >> searchType;
-                if (searchType == 1) {
-                    char searchName[20];
-                    cout << "Enter the name: ";
-                    cin >> searchName;
+                char searchName[20];
+                cout << "Enter the name to search: ";
+                cin >> searchName;
 
-                    bool found = false;
-                    file.clear();
-                    file.seekg(0);
-                    for (int i = 0; i < limit; ++i) {
-                        file.read(reinterpret_cast<char*>(&a[i]), sizeof(a[i]));
-                        if (strcmp(a[i].name, searchName) == 0) {
-                            cout << "Phone: " << a[i].phone << endl;
-                            found = true;
-                            break;
-                        }
+                bool found = false;
+                file.clear();
+                file.seekg(0, ios::beg);
+                Student temp;
+                while (file.read(reinterpret_cast<char*>(&temp), sizeof(Student))) {
+                    if (strcmp(temp.name, searchName) == 0) {
+                        cout << "Record Found:\n";
+                        temp.display();
+                        found = true;
+                        break;
                     }
-                    if (!found) {
-                        cout << "Record not found." << endl;
-                    }
-                } else if (searchType == 2) {
-                    string searchPhone;
-                    cout << "Enter the phone number: ";
-                    cin >> searchPhone;
-
-                    bool found = false;
-                    file.clear();
-                    file.seekg(0);
-                    for (int i = 0; i < limit; ++i) {
-                        file.read(reinterpret_cast<char*>(&a[i]), sizeof(a[i]));
-                        if (a[i].phone == searchPhone) {
-                            cout << "Name: " << a[i].name << endl;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        cout << "Record not found." << endl;
-                    }
+                }
+                if (!found) {
+                    cout << "Record not found." << endl;
                 }
                 break;
             }
 
             case 4: { // Modify
-                string oldPhone;
-                cout << "Enter the old phone number to modify: ";
-                cin >> oldPhone;
+                char searchName[20];
+                cout << "Enter the name to modify: ";
+                cin >> searchName;
 
                 bool modified = false;
                 file.clear();
-                file.seekg(0);
-                for (int i = 0; i < limit; ++i) {
-                    file.read(reinterpret_cast<char*>(&a[i]), sizeof(a[i]));
-                    if (a[i].phone == oldPhone) {
+                file.seekg(0, ios::beg);
+                Student temp;
+                while (file.read(reinterpret_cast<char*>(&temp), sizeof(Student))) {
+                    if (strcmp(temp.name, searchName) == 0) {
                         cout << "Enter new phone number: ";
-                        cin >> a[i].phone;
-                        file.seekp(-static_cast<int>(sizeof(a[i])), ios::cur);
-                        file.write(reinterpret_cast<char*>(&a[i]), sizeof(a[i]));
-                        modified = true;
+                        cin >> temp.phone;
+
+                        file.seekp(-static_cast<int>(sizeof(Student)), ios::cur);
+                        file.write(reinterpret_cast<char*>(&temp), sizeof(Student));
                         cout << "Record updated." << endl;
+                        modified = true;
                         break;
                     }
                 }
@@ -140,7 +114,7 @@ int main() {
                 break;
             }
 
-            case 5: // Exit
+            case 5:
                 cout << "Exiting..." << endl;
                 break;
 
@@ -151,7 +125,7 @@ int main() {
     } while (ch != 5);
 
     file.close();
-    delete[] a;
+    delete[] students;
 
     return 0;
 }
